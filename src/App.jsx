@@ -1,6 +1,7 @@
 import React from 'react'
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom'
 import { RegistrationProvider } from './context/RegistrationContext'
+import { useAnalytics } from './hooks/useAnalytics'
 import Home from './pages/Home'
 import Register from './pages/Register'
 import Pricing from './pages/Pricing'
@@ -10,6 +11,9 @@ import './App.css'
 
 function AnimatedRoutes() {
   const location = useLocation()
+  
+  // Track analytics
+  useAnalytics()
   
   return (
     <div className="page-transition-wrapper">

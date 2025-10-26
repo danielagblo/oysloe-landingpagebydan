@@ -10,8 +10,14 @@ from .models import (
     AboutFeature,
     ContactInfo,
     CarouselImage,
-    LandingPageSettings
+    LandingPageSettings,
+    PageView,
+    Session,
+    WhatsAppSettings
 )
+from django.utils import timezone
+from django.db.models import Count, Q, Avg
+from datetime import timedelta
 
 
 @csrf_exempt
@@ -223,6 +229,198 @@ def get_landing_page_content(request):
         return JsonResponse({
             'success': False,
             'message': f'Error fetching landing page content: {str(e)}'
+        }, status=500)
+
+
+@require_http_methods(["GET"])
+def get_whatsapp_settings(request):
+    """Get WhatsApp group settings"""
+    try:
+        settings = WhatsAppSettings.objects.first()
+        if not settings:
+            # Create default if none exists
+            settings = WhatsAppSettings.objects.create(
+                group_link='',
+                button_text='Join WhatsApp Group',
+                is_active=False
+            )
+        
+        return JsonResponse({
+            'success': True,
+            'data': {
+                'group_link': settings.group_link if settings.is_active else '',
+                'button_text': settings.button_text,
+                'is_active': settings.is_active
+            }
+        }, status=200)
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'message': f'Error fetching WhatsApp settings: {str(e)}'
+        }, status=500)
+
+
+@csrf_exempt
+@require_http_methods(["POST"])
+def track_page_view(request):
+    """Track a page view"""
+    try:
+        data = json.loads(request.body)
+        session_id = data.get('session_id')
+        page_path = data.get('page_path', '/')
+        time_on_page = data.get('time_on_page', 0)
+        
+        if not session_id:
+            return JsonResponse({
+                'success': False,
+                'message': 'session_id is required'
+            }, status=400)
+        
+        # Get client info
+        referrer = request.META.get('HTTP_REFERER', '')
+        user_agent = request.META.get('HTTP_USER_AGENT', '')
+        ip_address = request.META.get('REMOTE_ADDR', '')
+        
+        # Create or update session
+        session, created = Session.objects.get_or_create(
+            session_id=session_id,
+            defaults={
+                'referrer': referrer,
+                'user_agent': user_agent,
+                'ip_address': ip_address,
+                'page_views': 1,
+                'is_bounce': True
+            }
+        )
+        
+        if not created:
+            # Update existing session
+            session.page_views += 1
+            session.is_bounce = session.page_views == 1
+            session.save()
+        
+        # Create page view
+        PageView.objects.create(
+            session_id=session_id,
+            page_path=page_path,
+            referrer=referrer,
+            user_agent=user_agent,
+            ip_address=ip_address,
+            time_on_page=time_on_page
+        )
+        
+        return JsonResponse({
+            'success': True,
+            'message': 'Page view tracked'
+        }, status=200)
+        
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'message': f'Error tracking page view: {str(e)}'
+        }, status=500)
+
+
+@csrf_exempt
+@require_http_methods(["POST"])
+def track_session_end(request):
+    """Track when a session ends"""
+    try:
+        # Handle both regular POST and sendBeacon (blob) requests
+        if request.content_type == 'application/json':
+            data = json.loads(request.body)
+        else:
+            # sendBeacon sends data as blob
+            body = request.body.decode('utf-8') if request.body else '{}'
+            data = json.loads(body)
+        
+        session_id = data.get('session_id')
+        
+        if not session_id:
+            return JsonResponse({
+                'success': False,
+                'message': 'session_id is required'
+            }, status=400)
+        
+        try:
+            session = Session.objects.get(session_id=session_id)
+            session.ended_at = timezone.now()
+            session.save()
+            
+            return JsonResponse({
+                'success': True,
+                'message': 'Session ended tracked'
+            }, status=200)
+        except Session.DoesNotExist:
+            return JsonResponse({
+                'success': False,
+                'message': 'Session not found'
+            }, status=404)
+        
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'message': f'Error tracking session end: {str(e)}'
+        }, status=500)
+
+
+@require_http_methods(["GET"])
+def get_analytics(request):
+    """Get analytics summary"""
+    try:
+        # Time range (default: last 30 days)
+        days = int(request.GET.get('days', 30))
+        start_date = timezone.now() - timedelta(days=days)
+        
+        # Total page views
+        total_views = PageView.objects.filter(timestamp__gte=start_date).count()
+        
+        # Page views by path
+        views_by_path = PageView.objects.filter(
+            timestamp__gte=start_date
+        ).values('page_path').annotate(
+            count=Count('id')
+        ).order_by('-count')
+        
+        # Total sessions
+        total_sessions = Session.objects.filter(started_at__gte=start_date).count()
+        
+        # Bounce rate
+        bounced_sessions = Session.objects.filter(
+            started_at__gte=start_date,
+            is_bounce=True
+        ).count()
+        bounce_rate = (bounced_sessions / total_sessions * 100) if total_sessions > 0 else 0
+        
+        # Average session duration
+        avg_duration = Session.objects.filter(
+            started_at__gte=start_date,
+            ended_at__isnull=False
+        ).aggregate(
+            avg_duration=Avg('page_views')
+        )
+        
+        # Unique visitors (sessions)
+        unique_visitors = Session.objects.filter(started_at__gte=start_date).count()
+        
+        return JsonResponse({
+            'success': True,
+            'data': {
+                'total_views': total_views,
+                'total_sessions': total_sessions,
+                'unique_visitors': unique_visitors,
+                'bounce_rate': round(bounce_rate, 2),
+                'bounced_sessions': bounced_sessions,
+                'avg_pages_per_session': round(avg_duration['avg_duration'] or 1, 2),
+                'views_by_path': list(views_by_path),
+                'period_days': days
+            }
+        }, status=200)
+        
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'message': f'Error fetching analytics: {str(e)}'
         }, status=500)
 
 

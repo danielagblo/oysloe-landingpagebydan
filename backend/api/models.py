@@ -203,3 +203,82 @@ class LandingPageSettings(models.Model):
         self.pk = 1
         super().save(*args, **kwargs)
 
+
+class PageView(models.Model):
+    """Track individual page views"""
+    session_id = models.CharField(max_length=255, db_index=True, help_text="Unique session identifier")
+    page_path = models.CharField(max_length=255, db_index=True, help_text="Page path (e.g., '/', '/about')")
+    referrer = models.CharField(max_length=500, blank=True, null=True, help_text="Referrer URL")
+    user_agent = models.CharField(max_length=500, blank=True, null=True)
+    ip_address = models.GenericIPAddressField(blank=True, null=True)
+    timestamp = models.DateTimeField(auto_now_add=True, db_index=True)
+    time_on_page = models.IntegerField(default=0, help_text="Time spent on page in seconds")
+    
+    class Meta:
+        verbose_name = 'Page View'
+        verbose_name_plural = 'Page Views'
+        ordering = ['-timestamp']
+        indexes = [
+            models.Index(fields=['session_id', 'timestamp']),
+            models.Index(fields=['page_path', 'timestamp']),
+        ]
+    
+    def __str__(self):
+        return f"{self.page_path} - {self.timestamp.strftime('%Y-%m-%d %H:%M')}"
+
+
+class Session(models.Model):
+    """Track user sessions for bounce rate calculation"""
+    session_id = models.CharField(max_length=255, unique=True, db_index=True)
+    started_at = models.DateTimeField(auto_now_add=True, db_index=True)
+    ended_at = models.DateTimeField(blank=True, null=True)
+    page_views = models.IntegerField(default=1, help_text="Number of pages viewed in this session")
+    is_bounce = models.BooleanField(default=False, help_text="True if user viewed only one page")
+    referrer = models.CharField(max_length=500, blank=True, null=True)
+    user_agent = models.CharField(max_length=500, blank=True, null=True)
+    ip_address = models.GenericIPAddressField(blank=True, null=True)
+    
+    class Meta:
+        verbose_name = 'Session'
+        verbose_name_plural = 'Sessions'
+        ordering = ['-started_at']
+        indexes = [
+            models.Index(fields=['session_id']),
+            models.Index(fields=['started_at']),
+            models.Index(fields=['is_bounce']),
+        ]
+    
+    def __str__(self):
+        return f"Session {self.session_id[:8]}... - {self.page_views} views"
+
+
+class WhatsAppSettings(models.Model):
+    """WhatsApp group link settings"""
+    group_link = models.URLField(
+        max_length=500,
+        help_text="WhatsApp group invite link (e.g., https://chat.whatsapp.com/...)",
+        blank=True
+    )
+    button_text = models.CharField(
+        max_length=100,
+        default="Join WhatsApp Group",
+        help_text="Text to display on the WhatsApp button"
+    )
+    is_active = models.BooleanField(
+        default=True,
+        help_text="Show/hide the WhatsApp button"
+    )
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        verbose_name = 'WhatsApp Settings'
+        verbose_name_plural = 'WhatsApp Settings'
+    
+    def __str__(self):
+        return 'WhatsApp Settings'
+    
+    def save(self, *args, **kwargs):
+        # Ensure only one instance exists
+        self.pk = 1
+        super().save(*args, **kwargs)
+
