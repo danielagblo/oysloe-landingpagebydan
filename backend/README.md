@@ -23,12 +23,23 @@ This backend has been migrated from Flask to Django to enable Django Admin funct
    Follow the prompts to create your admin username, email, and password.
 
 4. **Run the Server**
+
+   **Development:**
    ```bash
    python run_server.py
    ```
    Or use:
    ```bash
    python manage.py runserver 0.0.0.0:5000
+   ```
+
+   **Production (using Gunicorn):**
+   ```bash
+   gunicorn project.wsgi:application --config gunicorn_config.py
+   ```
+   Or with custom settings:
+   ```bash
+   gunicorn project.wsgi:application --bind 0.0.0.0:5000 --workers 4
    ```
 
 5. **Access Django Admin**
