@@ -1,11 +1,16 @@
 #!/bin/bash
 # Build script for DigitalOcean deployment
+# This is a Python/Django app that also needs Node.js to build the frontend
 set -e  # Exit on error
 
 echo "=== Starting DigitalOcean build process ==="
+echo "Environment: Python for Django backend + Node.js for frontend build"
 echo "Current directory: $(pwd)"
 echo "Directory contents:"
 ls -la
+
+# Important: We're using Python as the primary environment
+# Node.js is only for building the React frontend assets
 
 # Step 1: Build the frontend
 echo "=== Step 1: Building frontend ==="
