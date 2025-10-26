@@ -427,20 +427,45 @@ def get_analytics(request):
 from django.http import HttpResponse
 @require_http_methods(["GET"])
 def serve_react_app(request):
-    """Catch-all route to serve React app - redirects to Vite dev server in development"""
-    return HttpResponse(
-        """
-        <html>
-            <head>
-                <title>Oysloe Landing Page</title>
-                <meta http-equiv="refresh" content="0; url=http://localhost:3001" />
-            </head>
-            <body>
-                <p>Redirecting to development server...</p>
-                <p>If you're not redirected, please access the app at <a href="http://localhost:3001">http://localhost:3001</a></p>
-            </body>
-        </html>
-        """,
-        content_type='text/html'
-    )
+    """Catch-all route to serve React app - serves built files in production, redirects to dev server in development"""
+    from django.conf import settings
+    import os
+    
+    if settings.DEBUG:
+        # In development, redirect to Vite dev server
+        return HttpResponse(
+            """
+            <html>
+                <head>
+                    <title>Oysloe Landing Page</title>
+                    <meta http-equiv="refresh" content="0; url=http://localhost:3001" />
+                </head>
+                <body>
+                    <p>Redirecting to development server...</p>
+                    <p>If you're not redirected, please access the app at <a href="http://localhost:3001">http://localhost:3001</a></p>
+                </body>
+            </html>
+            """,
+            content_type='text/html'
+        )
+    else:
+        # In production, serve the built React app
+        index_path = os.path.join(settings.BASE_DIR.parent, 'dist', 'index.html')
+        try:
+            with open(index_path, 'r') as f:
+                content = f.read()
+            return HttpResponse(content, content_type='text/html')
+        except FileNotFoundError:
+            return HttpResponse(
+                """
+                <html>
+                    <body>
+                        <h1>Error: Build files not found</h1>
+                        <p>The React app build files are missing. Please ensure the frontend is built before deployment.</p>
+                    </body>
+                </html>
+                """,
+                content_type='text/html',
+                status=500
+            )
 
