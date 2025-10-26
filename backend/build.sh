@@ -12,79 +12,35 @@ ls -la
 # Important: We're using Python as the primary environment
 # Node.js is only for building the React frontend assets
 
-# Step 1: Build the frontend
-echo "=== Step 1: Building frontend ==="
+# Step 1: Verify frontend build files exist
+echo "=== Step 1: Checking for pre-built frontend ==="
 
-# Find the root directory with package.json
-# The script might start from /workspace/backend or /app/backend
-# We need to find where package.json is
+# Find the root directory with dist folder
 ROOT_DIR="$(pwd)"
-if [ ! -f "package.json" ]; then
+if [ ! -d "dist" ]; then
     # Try going up one directory
     cd ..
     echo "Went up one directory to: $(pwd)"
     ls -la
-    if [ -f "package.json" ]; then
+    if [ -d "dist" ]; then
         ROOT_DIR="$(pwd)"
-        echo "✓ Found package.json in $(pwd)"
+        echo "✓ Found dist folder in $(pwd)"
     else
-        echo "ERROR: package.json not found in $(pwd) or parent"
+        echo "ERROR: dist folder not found in $(pwd) or parent"
         echo "Current directory contents:"
         ls -la
         exit 1
     fi
 else
-    echo "✓ Found package.json in current directory"
+    echo "✓ Found dist folder in current directory"
 fi
 
-cd "$ROOT_DIR"
-echo "Now in directory: $(pwd)"
-
-# Check Node.js availability
-echo "Checking Node.js version..."
-if command -v node &> /dev/null; then
-    echo "✓ Node.js version: $(node --version)"
+# Verify dist folder has required files
+if [ -f "$ROOT_DIR/dist/index.html" ]; then
+    echo "✓ dist/index.html exists - Frontend is ready"
+    ls -la "$ROOT_DIR/dist/"
 else
-    echo "ERROR: Node.js not found. Trying nvm..."
-    if [ -s "$HOME/.nvm/nvm.sh" ]; then
-        . "$HOME/.nvm/nvm.sh"
-        if [ -f ".nvmrc" ]; then
-            nvm use
-        fi
-        echo "✓ Node.js version: $(node --version)"
-    else
-        echo "ERROR: Node.js not available and nvm not found"
-        exit 1
-    fi
-fi
-
-echo "Checking for package.json..."
-if [ -f "package.json" ]; then
-    echo "✓ Found package.json"
-    echo "Installing npm dependencies..."
-    npm install --no-audit --no-fund
-    echo "Building React app..."
-    npm run build
-    echo "✓ Frontend build complete"
-    
-    # Verify dist folder was created
-    if [ -d "dist" ]; then
-        echo "✓ dist folder exists"
-        ls -la dist/
-        if [ -f "dist/index.html" ]; then
-            echo "✓ dist/index.html found"
-        else
-            echo "ERROR: dist/index.html not found"
-            exit 1
-        fi
-    else
-        echo "ERROR: dist folder not found after build"
-        exit 1
-    fi
-else
-    echo "ERROR: package.json not found in $(pwd)"
-    echo "Current directory contents:"
-    ls -la
+    echo "ERROR: dist/index.html not found"
     exit 1
 fi
 
