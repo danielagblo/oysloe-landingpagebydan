@@ -1,0 +1,7 @@
+Quick Deployment Fixes:
+
+1. Source Directory MUST be "/" (not "backend")
+2. Use .do/app.yaml - already created
+3. Set all environment variables
+4. Check build logs for success indicators
+5. If fails, delete and recreate app from GitHub

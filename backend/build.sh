@@ -62,7 +62,7 @@ echo "Checking for package.json..."
 if [ -f "package.json" ]; then
     echo "✓ Found package.json"
     echo "Installing npm dependencies..."
-    npm install
+    npm install --no-audit --no-fund
     echo "Building React app..."
     npm run build
     echo "✓ Frontend build complete"
