@@ -1,0 +1,75 @@
+.App {
+  width: 100%;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  padding: 2vh 2vw;
+  position: relative;
+  overflow-x: hidden;
+}
+
+.page-transition-wrapper {
+  width: 100%;
+  position: relative;
+  flex: 1;
+}
+
+.page-transition {
+  width: 100%;
+  animation: fadeInSlide 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  will-change: opacity, transform;
+}
+
+@keyframes fadeInSlide {
+  0% {
+    opacity: 0;
+    transform: translateY(30px) scale(0.98);
+  }
+  50% {
+    opacity: 0.8;
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.page-transition-exit {
+  animation: fadeOutSlide 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes fadeOutSlide {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+}
+
+@media (max-width: 768px) {
+  .App {
+    padding: 1vh 4vw;
+  }
+  
+  .page-transition {
+    animation: fadeInSlide 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  }
+  
+  @keyframes fadeInSlide {
+    0% {
+      opacity: 0;
+      transform: translateY(20px) scale(0.98);
+    }
+    50% {
+      opacity: 0.8;
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+  }
+}
+

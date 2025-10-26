@@ -1,0 +1,268 @@
+.about-page {
+  width: 100%;
+  min-height: calc(100vh - 80px);
+  background-color: #ffffff;
+  padding: 40px 20px 120px;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+}
+
+.about-container {
+  width: 100%;
+  max-width: 1200px;
+  display: flex;
+  flex-direction: column;
+  gap: 60px;
+}
+
+.about-hero {
+  width: 100%;
+  margin-top: 20px;
+  overflow: visible;
+}
+
+.about-content {
+  display: flex;
+  flex-direction: column;
+  gap: 48px;
+  padding: 0 20px;
+}
+
+.about-title {
+  font-size: clamp(32px, 4vw, 48px);
+  font-weight: 700;
+  color: #374957;
+  text-align: center;
+  margin-bottom: 16px;
+}
+
+.about-description {
+  font-size: clamp(16px, 2vw, 20px);
+  color: #374957;
+  line-height: 1.6;
+  text-align: center;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.about-features {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 32px;
+  margin-top: 32px;
+}
+
+.feature-card {
+  background: #F9F9F9;
+  border-radius: 16px;
+  padding: 32px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 16px;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.feature-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+}
+
+.feature-icon {
+  font-size: 48px;
+  margin-bottom: 8px;
+}
+
+.feature-title {
+  font-size: clamp(18px, 2vw, 22px);
+  font-weight: 600;
+  color: #374957;
+  margin: 0;
+}
+
+.feature-text {
+  font-size: clamp(14px, 1.5vw, 16px);
+  color: #374957;
+  line-height: 1.6;
+  margin: 0;
+}
+
+.about-stats {
+  display: flex;
+  justify-content: center;
+  gap: 60px;
+  margin-top: 48px;
+  padding: 40px 20px;
+  background: #F9F9F9;
+  border-radius: 16px;
+}
+
+.stat-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.stat-number {
+  font-size: clamp(32px, 4vw, 48px);
+  font-weight: 700;
+  color: #374957;
+}
+
+.stat-label {
+  font-size: clamp(14px, 1.5vw, 16px);
+  color: #374957;
+  font-weight: 500;
+}
+
+.contact-section {
+  margin-top: 48px;
+  padding: 40px 20px;
+  background: #F9F9F9;
+  border-radius: 16px;
+}
+
+.contact-title {
+  font-size: clamp(24px, 3vw, 32px);
+  font-weight: 700;
+  color: #374957;
+  text-align: center;
+  margin-bottom: 32px;
+}
+
+.contact-info {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.contact-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  padding: 20px;
+  background: #ffffff;
+  border-radius: 12px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.contact-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.contact-icon {
+  font-size: 28px;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.contact-details {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+}
+
+.contact-label {
+  font-size: clamp(12px, 1.5vw, 14px);
+  color: #888888;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.contact-value {
+  font-size: clamp(16px, 2vw, 18px);
+  color: #374957;
+  font-weight: 600;
+}
+
+.about-footer {
+  margin-top: 60px;
+  padding-top: 40px;
+  border-top: 1px solid #e0e0e0;
+  text-align: center;
+}
+
+.footer-text {
+  font-size: clamp(14px, 1.5vw, 16px);
+  color: #888888;
+  margin: 0;
+}
+
+.footer-link {
+  color: #48bb78;
+  text-decoration: none;
+  font-weight: 600;
+  transition: color 0.3s ease, text-decoration 0.3s ease;
+}
+
+.footer-link:hover {
+  color: #38a169;
+  text-decoration: underline;
+}
+
+@media (max-width: 768px) {
+  .about-page {
+    padding: 20px 16px 120px;
+    overflow-x: hidden;
+  }
+
+  .about-container {
+    gap: 40px;
+    overflow: visible;
+  }
+
+  .about-hero {
+    overflow: visible;
+  }
+
+  .about-content {
+    padding: 0;
+    gap: 32px;
+  }
+
+  .about-features {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+
+  .about-stats {
+    flex-direction: column;
+    gap: 32px;
+    padding: 32px 20px;
+  }
+
+  .contact-section {
+    margin-top: 32px;
+    padding: 32px 16px;
+  }
+
+  .contact-title {
+    margin-bottom: 24px;
+  }
+
+  .contact-info {
+    gap: 16px;
+  }
+
+  .contact-item {
+    padding: 16px;
+  }
+
+  .contact-icon {
+    font-size: 24px;
+  }
+
+  .about-footer {
+    margin-top: 40px;
+    padding-top: 32px;
+  }
+}
+

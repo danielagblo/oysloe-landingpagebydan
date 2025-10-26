@@ -1,0 +1,173 @@
+.registration-card {
+  background: #f7fafc;
+  border-radius: 20px;
+  padding: clamp(30px, 4vh, 50px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 450px;
+  max-height: 95vh;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  margin: 0 auto;
+}
+
+.form-title {
+  font-size: clamp(20px, 2.5vw, 28px);
+  font-weight: 700;
+  color: #374957;
+  margin-bottom: 2px;
+}
+
+.registration-notice {
+  font-size: clamp(14px, 1.5vw, 16px);
+  color: #374957;
+  font-weight: 500;
+  margin-bottom: clamp(16px, 2vh, 24px);
+  text-align: left;
+  opacity: 0.9;
+}
+
+.registration-form {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(16px, 2vh, 24px);
+  margin-bottom: clamp(20px, 2.5vh, 36px);
+}
+
+.input-group {
+  position: relative;
+  display: flex;
+  align-items: center;
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 0 16px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.input-icon {
+  width: 20px;
+  height: 20px;
+  margin-right: 12px;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
+.input-group input,
+.input-group .select-input {
+  flex: 1;
+  border: none;
+  outline: none;
+  padding: clamp(14px, 2vh, 18px) 0;
+  font-size: clamp(14px, 1.2vw, 16px);
+  color: #374957;
+  background: transparent;
+}
+
+.input-group input::placeholder {
+  color: #a0aec0;
+}
+
+.select-input {
+  appearance: none;
+  cursor: pointer;
+}
+
+.select-arrow {
+  position: absolute;
+  right: 20px;
+  color: #374957;
+  pointer-events: none;
+  font-size: 12px;
+}
+
+.register-button {
+  width: 100%;
+  padding: clamp(14px, 1.8vh, 18px);
+  background: #48bb78;
+  color: #ffffff;
+  border: none;
+  border-radius: 12px;
+  font-size: clamp(16px, 1.5vw, 18px);
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  margin-top: 8px;
+}
+
+.register-button:hover:not(:disabled) {
+  background: #38a169;
+}
+
+.register-button:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.submit-status {
+  padding: 12px;
+  border-radius: 8px;
+  text-align: center;
+  font-size: 14px;
+}
+
+.submit-status.success {
+  background: #c6f6d5;
+  color: #22543d;
+}
+
+.submit-status.error {
+  background: #fed7d7;
+  color: #742a2a;
+}
+
+.benefits-list {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(8px, 1vh, 12px);
+}
+
+.benefit-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  color: #374957;
+  font-size: clamp(12px, 1.2vw, 14px);
+  line-height: 1.5;
+}
+
+.checkmark {
+  color: #48bb78;
+  font-weight: 700;
+  font-size: 18px;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.whatsapp-link {
+  display: inline-block;
+  color: #25D366;
+  text-decoration: none;
+  font-size: clamp(14px, 1.3vw, 16px);
+  font-weight: 500;
+  margin-top: clamp(16px, 2vh, 24px);
+  transition: color 0.2s ease;
+  cursor: pointer;
+}
+
+.whatsapp-link:hover {
+  color: #20BA5A;
+  text-decoration: underline;
+}
+
+@media (max-width: 768px) {
+  .registration-card {
+    padding: 24px;
+  }
+  
+  .form-title {
+    font-size: 24px;
+    margin-bottom: 24px;
+  }
+}
+
