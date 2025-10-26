@@ -435,30 +435,33 @@ def serve_react_app(request):
     # Path to built React app
     index_path = os.path.join(settings.BASE_DIR.parent, 'dist', 'index.html')
     
-    # Check if production mode (DEBUG=False)
-    is_production = not settings.DEBUG
+    # Detect if we're on DigitalOcean (never redirect there!)
+    host = request.get_host()
+    is_digitalocean = 'ondigitalocean.app' in host or 'digitalocean.com' in host
     
+    # Only redirect if: DEBUG=True AND not on DigitalOcean AND dist doesn't exist
     if os.path.exists(index_path):
-        # Serve the built React app
+        # Serve the built React app (always if it exists)
         return FileResponse(open(index_path, 'rb'), content_type='text/html')
-    elif is_production:
-        # Production but build files missing - show error
+    elif is_digitalocean:
+        # On DigitalOcean but build files missing - show error
         return HttpResponse(
             """
             <html>
                 <body>
                     <h1>Error: Build files not found</h1>
-                    <p>The React app build files are missing. Please ensure the frontend is built before deployment.</p>
-                    <p>Check that the build command ran successfully.</p>
+                    <p>The React app build files are missing.</p>
                     <p>Path checked: """ + index_path + """</p>
+                    <p>Host: """ + host + """</p>
+                    <p>DEBUG setting: """ + str(settings.DEBUG) + """</p>
                 </body>
             </html>
             """,
             content_type='text/html',
             status=500
         )
-    else:
-        # Development mode - redirect to Vite dev server
+    elif settings.DEBUG:
+        # Development mode AND not on DigitalOcean - redirect to Vite dev server
         return HttpResponse(
             """
             <html>
@@ -473,5 +476,20 @@ def serve_react_app(request):
             </html>
             """,
             content_type='text/html'
+        )
+    else:
+        # Production but build files missing
+        return HttpResponse(
+            """
+            <html>
+                <body>
+                    <h1>Error: Build files not found</h1>
+                    <p>The React app build files are missing. Please ensure the frontend is built before deployment.</p>
+                    <p>Check that the build command ran successfully.</p>
+                </body>
+            </html>
+            """,
+            content_type='text/html',
+            status=500
         )
 
