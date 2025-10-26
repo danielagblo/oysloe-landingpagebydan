@@ -2,13 +2,16 @@
 URL configuration for project project.
 """
 from django.contrib import admin
-from django.urls import path, include
+from django.urls import path, include, re_path
 from django.conf import settings
 from django.conf.urls.static import static
+from api import views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/', include('api.urls')),
+    # Catch-all route for React Router - redirects to Vite dev server
+    re_path(r'^(?!admin|api|static|media).*$', views.serve_react_app),
 ]
 
 # Serve media files in development

@@ -225,3 +225,24 @@ def get_landing_page_content(request):
             'message': f'Error fetching landing page content: {str(e)}'
         }, status=500)
 
+
+from django.http import HttpResponse
+@require_http_methods(["GET"])
+def serve_react_app(request):
+    """Catch-all route to serve React app - redirects to Vite dev server in development"""
+    return HttpResponse(
+        """
+        <html>
+            <head>
+                <title>Oysloe Landing Page</title>
+                <meta http-equiv="refresh" content="0; url=http://localhost:3001" />
+            </head>
+            <body>
+                <p>Redirecting to development server...</p>
+                <p>If you're not redirected, please access the app at <a href="http://localhost:3001">http://localhost:3001</a></p>
+            </body>
+        </html>
+        """,
+        content_type='text/html'
+    )
+
