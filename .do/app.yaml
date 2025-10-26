@@ -20,8 +20,6 @@ services:
     instance_size_slug: basic-xxs
     
     envs:
-      - key: NODE_VERSION
-        value: "18"
       - key: PYTHONPATH
         value: "/app/backend"
       - key: SECRET_KEY

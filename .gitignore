@@ -12,7 +12,7 @@ env/
 ENV/
 
 # Build outputs
-dist/
+# dist/ - KEEP THIS FOLDER for production deployment
 build/
 *.egg-info/
 

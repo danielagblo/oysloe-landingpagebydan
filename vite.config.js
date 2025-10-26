@@ -11,6 +11,9 @@ export default defineConfig({
         target: 'http://localhost:5000',
         changeOrigin: true
       }
+    },
+    watch: {
+      ignored: ['**/backend/**', '**/node_modules/**', '**/dist/**']
     }
   },
   build: {
