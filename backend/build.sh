@@ -21,7 +21,16 @@ echo "Building React app..."
 npm run build || echo "ERROR: npm run build failed"
 
 echo "Checking if dist folder was created..."
-ls -la dist/ || echo "WARNING: dist folder not found"
+if [ -d "dist" ]; then
+    echo "✓ dist folder exists"
+    ls -la dist/
+    echo "Checking index.html..."
+    ls -la dist/index.html || echo "ERROR: index.html not found in dist/"
+else
+    echo "ERROR: dist folder not found"
+    echo "Current directory contents:"
+    ls -la
+fi
 
 echo "Going back to backend directory..."
 cd backend
