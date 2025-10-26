@@ -12,7 +12,7 @@ env/
 ENV/
 
 # Build outputs
-# dist/ - KEEP THIS FOLDER for production deployment
+dist/
 build/
 *.egg-info/
 
@@ -33,12 +33,4 @@ npm-debug.log*
 # OS
 .DS_Store
 Thumbs.db
-
-# Django
-backend/db.sqlite3
-backend/media/
-backend/staticfiles/
-backend/static/
-backend/*.pyc
-backend/__pycache__/
 

@@ -1,0 +1,27 @@
+[Unit]
+Description=Oysloe Landing Page Backend (Django + Gunicorn)
+After=network.target
+
+[Service]
+Type=notify
+User=www-data
+Group=www-data
+WorkingDirectory=/var/www/oysloe-landing-page/backend
+Environment=DJANGO_SETTINGS_MODULE=project.settings_production
+Environment=DJANGO_SECRET_KEY=your-secret-key-here
+Environment=DB_NAME=oysloe_db
+Environment=DB_USER=postgres
+Environment=DB_PASSWORD=your-db-password
+Environment=DB_HOST=localhost
+Environment=DB_PORT=5432
+Environment=PRODUCTION_DOMAIN=your-domain.com
+ExecStart=/var/www/oysloe-landing-page/backend/venv/bin/gunicorn project.wsgi:application --config gunicorn_config.py
+ExecReload=/bin/kill -s HUP $MAINPID
+Restart=always
+RestartSec=3
+KillMode=mixed
+TimeoutStopSec=5
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target

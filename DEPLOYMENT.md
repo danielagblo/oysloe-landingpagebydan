@@ -1,135 +1,226 @@
 # DigitalOcean Deployment Guide
 
-This guide will help you deploy the Oysloe Landing Page to DigitalOcean App Platform.
+This guide covers deploying the Oysloe Landing Page to DigitalOcean using two methods:
+1. **App Platform** (Recommended - Managed Platform)
+2. **Droplet** (VPS - More Control)
 
-## Prerequisites
+## Method 1: DigitalOcean App Platform (Recommended)
 
-- A DigitalOcean account
-- Your repository pushed to GitHub (already done)
+### Prerequisites
+- DigitalOcean account
+- GitHub repository with your code
+- Domain name (optional)
 
-## Deployment Steps
+### Steps
 
-### 1. Create App on DigitalOcean
+1. **Create a new App in DigitalOcean App Platform**
+   - Go to DigitalOcean Control Panel
+   - Click "Create" → "Apps"
+   - Connect your GitHub repository
 
-1. Go to [DigitalOcean App Platform](https://cloud.digitalocean.com/apps)
-2. Click "Create App"
-3. Connect your GitHub repository: `danielagblo/oysloe-landingpagebydan`
-4. Select the branch (usually `main`)
+2. **Configure the App**
+   - Use the `.do/app.yaml` configuration file
+   - Set environment variables:
+     ```
+     DJANGO_SECRET_KEY=your-secret-key-here
+     DB_NAME=oysloe_db
+     DB_USER=postgres
+     DB_PASSWORD=your-db-password
+     DB_HOST=your-db-host
+     DB_PORT=5432
+     PRODUCTION_DOMAIN=your-domain.com
+     ```
 
-### 2. Configure Backend Service
+3. **Add Database**
+   - Add a PostgreSQL database to your app
+   - Note the connection details for environment variables
 
-**Basic Settings:**
-- **Name**: `backend` or `api`
-- **Source Directory**: `backend`
-- **Build Command**: 
-  ```bash
-  pip install -r requirements.txt && python manage.py collectstatic --noinput && python manage.py migrate --noinput
-  ```
-- **Run Command**: 
-  ```bash
-  gunicorn project.wsgi:application --config gunicorn_config.py
-  ```
-- **HTTP Port**: `5000`
+4. **Deploy**
+   - Click "Create Resources"
+   - Wait for deployment to complete
 
-**Environment Variables:**
-Set these in the DigitalOcean App Platform dashboard:
+### Benefits
+- ✅ Fully managed platform
+- ✅ Automatic scaling
+- ✅ Built-in SSL certificates
+- ✅ Easy database management
+- ✅ Automatic deployments from GitHub
 
+## Method 2: DigitalOcean Droplet (VPS)
+
+### Prerequisites
+- DigitalOcean account
+- SSH access to your droplet
+- Domain name pointing to your droplet
+
+### Steps
+
+1. **Create a Droplet**
+   - Choose Ubuntu 20.04 or 22.04
+   - Minimum 1GB RAM, 1 CPU
+   - Add SSH key
+
+2. **Run Setup Script**
+   ```bash
+   # SSH into your droplet
+   ssh root@your-droplet-ip
+   
+   # Download and run setup script
+   curl -sSL https://raw.githubusercontent.com/danielagblo/oysloe-landingpagebydan/main/setup-droplet.sh | bash
+   ```
+
+3. **Configure Environment**
+   ```bash
+   # Edit environment variables
+   sudo nano /var/www/oysloe-landing-page/.env
+   
+   # Update with your actual values:
+   DJANGO_SECRET_KEY=your-secret-key-here
+   DB_NAME=oysloe_db
+   DB_USER=oysloe_user
+   DB_PASSWORD=your-secure-password-here
+   DB_HOST=localhost
+   DB_PORT=5432
+   PRODUCTION_DOMAIN=your-domain.com
+   ```
+
+4. **Configure SSL Certificate**
+   ```bash
+   # Install Certbot
+   sudo apt install certbot python3-certbot-nginx
+   
+   # Get SSL certificate
+   sudo certbot --nginx -d your-domain.com -d www.your-domain.com
+   ```
+
+5. **Update Nginx Configuration**
+   ```bash
+   # Edit Nginx config
+   sudo nano /etc/nginx/sites-available/oysloe-landing-page
+   
+   # Update server_name with your domain
+   server_name your-domain.com www.your-domain.com;
+   ```
+
+6. **Restart Services**
+   ```bash
+   sudo systemctl restart oysloe-backend
+   sudo systemctl restart oysloe-frontend
+   sudo systemctl restart nginx
+   ```
+
+### Benefits
+- ✅ Full control over server
+- ✅ Lower cost for high traffic
+- ✅ Custom configurations
+- ✅ Direct server access
+
+## Environment Variables
+
+### Required Variables
+- `DJANGO_SECRET_KEY`: Generate a secure secret key
+- `DB_NAME`: Database name
+- `DB_USER`: Database username
+- `DB_PASSWORD`: Database password
+- `DB_HOST`: Database host
+- `DB_PORT`: Database port (usually 5432)
+- `PRODUCTION_DOMAIN`: Your production domain
+
+### Optional Variables
+- `EMAIL_HOST`: SMTP server for emails
+- `EMAIL_PORT`: SMTP port
+- `EMAIL_USE_TLS`: Use TLS for email
+- `EMAIL_HOST_USER`: Email username
+- `EMAIL_HOST_PASSWORD`: Email password
+- `REDIS_URL`: Redis URL for caching
+- `AWS_ACCESS_KEY_ID`: AWS access key
+- `AWS_SECRET_ACCESS_KEY`: AWS secret key
+- `AWS_STORAGE_BUCKET_NAME`: S3 bucket name
+- `AWS_S3_REGION_NAME`: AWS region
+
+## Security Checklist
+
+- [ ] Change default Django secret key
+- [ ] Use strong database passwords
+- [ ] Enable HTTPS/SSL
+- [ ] Configure firewall (UFW)
+- [ ] Regular security updates
+- [ ] Backup database regularly
+- [ ] Monitor logs for suspicious activity
+
+## Monitoring and Maintenance
+
+### Log Files
+- Django logs: `/var/www/oysloe-landing-page/backend/logs/django.log`
+- Nginx logs: `/var/log/nginx/access.log` and `/var/log/nginx/error.log`
+- System logs: `journalctl -u oysloe-backend` and `journalctl -u oysloe-frontend`
+
+### Backup Database
+```bash
+# Create backup
+pg_dump -h localhost -U oysloe_user oysloe_db > backup_$(date +%Y%m%d_%H%M%S).sql
+
+# Restore backup
+psql -h localhost -U oysloe_user oysloe_db < backup_file.sql
 ```
-SECRET_KEY=<generate-a-secure-secret-key>
-DEBUG=False
-ALLOWED_HOSTS=your-app-name.ondigitalocean.app
-DATABASE_URL=<provided-by-digitalocean-when-you-add-postgres>
-CORS_ALLOWED_ORIGINS=https://your-frontend-domain.com
-CORS_ALLOW_ALL_ORIGINS=False
-SECURE_SSL_REDIRECT=True
+
+### Update Application
+```bash
+# Pull latest changes
+cd /var/www/oysloe-landing-page
+git pull origin main
+
+# Update backend
+cd backend
+source venv/bin/activate
+pip install -r requirements.txt
+python manage.py migrate
+python manage.py collectstatic --noinput
+
+# Update frontend
+cd ..
+npm ci
+npm run build
+
+# Restart services
+sudo systemctl restart oysloe-backend
+sudo systemctl restart oysloe-frontend
 ```
-
-### 3. Add PostgreSQL Database
-
-1. In your App Platform app, go to "Components"
-2. Click "Add Component" → "Database"
-3. Select "PostgreSQL"
-4. Choose a plan (Development DB for testing)
-5. DigitalOcean will automatically set the `DATABASE_URL` environment variable
-
-### 4. Configure Frontend (Optional)
-
-If deploying frontend to DigitalOcean:
-
-**Basic Settings:**
-- **Name**: `frontend`
-- **Source Directory**: `/` (root)
-- **Build Command**: `npm install && npm run build`
-- **Output Directory**: `dist`
-- **HTTP Port**: `3000` or `5173`
-
-**Environment Variables:**
-```
-VITE_API_URL=https://your-backend-app.ondigitalocean.app
-```
-
-### 5. Configure Static Files
-
-Django will automatically collect static files during build. WhiteNoise will serve them.
-
-### 6. Run Migrations
-
-After first deployment, you may need to run migrations:
-1. Go to App Platform → Components → Backend → Settings
-2. Add a one-off command: `python manage.py migrate`
-3. Add another for superuser: `python manage.py createsuperuser` (interactive)
-
-### 7. Media Files
-
-For production, consider using DigitalOcean Spaces (S3-compatible) for media storage:
-- Create a Spaces bucket
-- Configure Django to use it (requires `django-storages`)
-
-## Post-Deployment Checklist
-
-- [ ] Set `DEBUG=False` in environment variables
-- [ ] Generate and set `SECRET_KEY`
-- [ ] Configure `ALLOWED_HOSTS` with your domain
-- [ ] Set up PostgreSQL database
-- [ ] Run migrations
-- [ ] Create superuser account
-- [ ] Test API endpoints
-- [ ] Configure frontend CORS settings
-- [ ] Set up custom domain (optional)
-- [ ] Enable SSL/HTTPS (automatic on DigitalOcean)
-
-## Environment Variables Reference
-
-| Variable | Description | Example |
-|----------|-------------|---------|
-| `SECRET_KEY` | Django secret key | (auto-generated) |
-| `DEBUG` | Debug mode | `False` for production |
-| `ALLOWED_HOSTS` | Allowed hostnames | `your-app.ondigitalocean.app` |
-| `DATABASE_URL` | PostgreSQL connection | (auto-set by DigitalOcean) |
-| `CORS_ALLOWED_ORIGINS` | Frontend URLs | `https://your-frontend.com` |
-| `SECURE_SSL_REDIRECT` | Force HTTPS | `True` |
 
 ## Troubleshooting
 
-### Database Connection Issues
-- Verify `DATABASE_URL` is set correctly
-- Check database component is running
-- Ensure migrations ran successfully
+### Common Issues
 
-### Static Files Not Loading
-- Verify `collectstatic` ran during build
-- Check `STATIC_ROOT` path is correct
-- Verify WhiteNoise middleware is enabled
+1. **502 Bad Gateway**
+   - Check if services are running: `sudo systemctl status oysloe-backend oysloe-frontend`
+   - Check logs: `journalctl -u oysloe-backend -f`
 
-### CORS Errors
-- Check `CORS_ALLOWED_ORIGINS` includes your frontend URL
-- Verify frontend is making requests to correct backend URL
-- Check `CORS_ALLOW_CREDENTIALS` is set correctly
+2. **Database Connection Error**
+   - Verify database credentials in `.env`
+   - Check if PostgreSQL is running: `sudo systemctl status postgresql`
 
-## Support
+3. **Static Files Not Loading**
+   - Run: `python manage.py collectstatic --noinput`
+   - Check Nginx configuration for static file paths
 
-For issues, check:
-- DigitalOcean App Platform logs
-- Django logs in App Platform dashboard
-- Build logs for errors during deployment
+4. **Permission Denied**
+   - Fix permissions: `sudo chown -R www-data:www-data /var/www/oysloe-landing-page`
 
+### Support
+- Check application logs
+- Verify environment variables
+- Test database connectivity
+- Check Nginx configuration
+
+## Cost Estimation
+
+### App Platform
+- Basic Plan: $5/month (512MB RAM, 1 CPU)
+- Professional Plan: $12/month (1GB RAM, 1 CPU)
+- Database: $15/month (1GB RAM, 1 CPU, 10GB storage)
+
+### Droplet
+- Basic Droplet: $6/month (1GB RAM, 1 CPU, 25GB SSD)
+- Managed Database: $15/month (1GB RAM, 1 CPU, 10GB storage)
+
+Choose the method that best fits your needs and budget!
