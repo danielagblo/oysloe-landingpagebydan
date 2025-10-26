@@ -85,7 +85,7 @@ DATABASES = {
 
 # Use DATABASE_URL if provided (for DigitalOcean App Platform)
 db_url = config('DATABASE_URL', default=None)
-if db_url:
+if db_url and db_url.strip():  # Check if db_url exists and is not empty
     import dj_database_url
     DATABASES['default'] = dj_database_url.config(default=db_url)
 
