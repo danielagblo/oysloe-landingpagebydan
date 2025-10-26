@@ -4,14 +4,13 @@
   "services": [
     {
       "name": "backend",
-      "source_dir": "backend",
       "github": {
         "repo": "danielagblo/oysloe-landingpagebydan",
         "branch": "main",
         "deploy_on_push": true
       },
-      "build_command": "bash ./build.sh",
-      "run_command": "gunicorn project.wsgi:application --config gunicorn_config.py",
+      "build_command": "cd backend && bash ./build.sh",
+      "run_command": "cd backend && gunicorn project.wsgi:application --config gunicorn_config.py",
       "environment_slug": "python",
       "envs": [
         {
