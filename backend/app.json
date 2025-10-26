@@ -1,0 +1,33 @@
+{
+  "name": "Oysloe Landing Page Backend",
+  "description": "Django backend for Oysloe landing page",
+  "repository": "https://github.com/danielagblo/oysloe-landingpagebydan.git",
+  "keywords": ["django", "python", "api"],
+  "env": {
+    "SECRET_KEY": {
+      "description": "Django secret key",
+      "generator": "secret"
+    },
+    "DEBUG": {
+      "value": "False"
+    },
+    "ALLOWED_HOSTS": {
+      "value": "*.ondigitalocean.app"
+    }
+  },
+  "formation": {
+    "web": {
+      "quantity": 1,
+      "size": "basic-xxs"
+    }
+  },
+  "addons": [
+    "do:postgresql"
+  ],
+  "buildpacks": [
+    {
+      "url": "heroku/python"
+    }
+  ]
+}
+
