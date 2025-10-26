@@ -1,2 +1,2 @@
-web: cd backend && gunicorn project.wsgi:application --config gunicorn_config.py
+web: gunicorn backend.project.wsgi:application --chdir backend --config backend/gunicorn_config.py
 

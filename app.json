@@ -9,8 +9,8 @@
         "branch": "main",
         "deploy_on_push": true
       },
-      "build_command": "cd backend && bash ./build.sh",
-      "run_command": "cd backend && gunicorn project.wsgi:application --config gunicorn_config.py",
+      "build_command": "bash backend/build.sh",
+      "run_command": "gunicorn backend.project.wsgi:application --chdir backend --config backend/gunicorn_config.py",
       "environment_slug": "python",
       "envs": [
         {
