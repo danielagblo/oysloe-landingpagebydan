@@ -9,6 +9,7 @@
         "branch": "main",
         "deploy_on_push": true
       },
+      "source_dir": "/",
       "build_command": "bash backend/build.sh",
       "run_command": "gunicorn backend.project.wsgi:application --chdir backend --config backend/gunicorn_config.py",
       "environment_slug": "python",

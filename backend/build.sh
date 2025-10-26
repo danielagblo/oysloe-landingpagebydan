@@ -4,10 +4,35 @@ set -e  # Exit on error
 
 echo "=== Starting DigitalOcean build process ==="
 echo "Current directory: $(pwd)"
+echo "Directory contents:"
+ls -la
 
 # Step 1: Build the frontend
 echo "=== Step 1: Building frontend ==="
-cd .. # Go to the root directory (/app)
+
+# Find the root directory with package.json
+# The script might start from /workspace/backend or /app/backend
+# We need to find where package.json is
+ROOT_DIR="$(pwd)"
+if [ ! -f "package.json" ]; then
+    # Try going up one directory
+    cd ..
+    echo "Went up one directory to: $(pwd)"
+    ls -la
+    if [ -f "package.json" ]; then
+        ROOT_DIR="$(pwd)"
+        echo "✓ Found package.json in $(pwd)"
+    else
+        echo "ERROR: package.json not found in $(pwd) or parent"
+        echo "Current directory contents:"
+        ls -la
+        exit 1
+    fi
+else
+    echo "✓ Found package.json in current directory"
+fi
+
+cd "$ROOT_DIR"
 echo "Now in directory: $(pwd)"
 
 # Check Node.js availability
@@ -60,8 +85,23 @@ fi
 
 # Step 2: Build the backend
 echo "=== Step 2: Building backend ==="
-cd backend # Go back to backend directory (/app/backend)
-echo "Now in directory: $(pwd)"
+
+# Find the backend directory
+BACKEND_DIR="$ROOT_DIR/backend"
+if [ ! -d "$BACKEND_DIR" ]; then
+    # Maybe we're already in backend?
+    if [ -f "manage.py" ]; then
+        BACKEND_DIR="$(pwd)"
+        echo "Already in backend directory"
+    else
+        echo "ERROR: backend directory not found"
+        echo "Looking for: $BACKEND_DIR"
+        exit 1
+    fi
+else
+    cd "$BACKEND_DIR"
+    echo "Now in backend directory: $(pwd)"
+fi
 
 echo "Installing backend dependencies..."
 pip install -r requirements.txt
