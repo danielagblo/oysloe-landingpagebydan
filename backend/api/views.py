@@ -432,14 +432,33 @@ def serve_react_app(request):
     from django.http import FileResponse
     import os
     
-    # Always serve the built files if they exist (for production)
+    # Path to built React app
     index_path = os.path.join(settings.BASE_DIR.parent, 'dist', 'index.html')
+    
+    # Check if production mode (DEBUG=False)
+    is_production = not settings.DEBUG
     
     if os.path.exists(index_path):
         # Serve the built React app
         return FileResponse(open(index_path, 'rb'), content_type='text/html')
-    elif settings.DEBUG:
-        # In development, redirect to Vite dev server only if build files don't exist
+    elif is_production:
+        # Production but build files missing - show error
+        return HttpResponse(
+            """
+            <html>
+                <body>
+                    <h1>Error: Build files not found</h1>
+                    <p>The React app build files are missing. Please ensure the frontend is built before deployment.</p>
+                    <p>Check that the build command ran successfully.</p>
+                    <p>Path checked: """ + index_path + """</p>
+                </body>
+            </html>
+            """,
+            content_type='text/html',
+            status=500
+        )
+    else:
+        # Development mode - redirect to Vite dev server
         return HttpResponse(
             """
             <html>
@@ -454,20 +473,5 @@ def serve_react_app(request):
             </html>
             """,
             content_type='text/html'
-        )
-    else:
-        # Production but build files missing
-        return HttpResponse(
-            """
-            <html>
-                <body>
-                    <h1>Error: Build files not found</h1>
-                    <p>The React app build files are missing. Please ensure the frontend is built before deployment.</p>
-                    <p>Check that the build command ran successfully.</p>
-                </body>
-            </html>
-            """,
-            content_type='text/html',
-            status=500
         )
 
