@@ -140,7 +140,8 @@ STATICFILES_DIRS = [
     BASE_DIR.parent / 'dist',
 ]
 
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+# Use compressed storage but without manifest for React files
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedStaticFilesStorage'
 
 # Media files (user uploads)
 MEDIA_URL = '/media/'

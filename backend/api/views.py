@@ -433,27 +433,81 @@ def serve_react_app(request):
     import os
     
     # Path to built React app
-    index_path = os.path.join(settings.BASE_DIR.parent, 'dist', 'index.html')
+    base_dir = settings.BASE_DIR
+    dist_path = base_dir.parent / 'dist'
+    index_path = dist_path / 'index.html'
     
     # Detect if we're on DigitalOcean (never redirect there!)
     host = request.get_host()
     is_digitalocean = 'ondigitalocean.app' in host or 'digitalocean.com' in host
     
-    # Only redirect if: DEBUG=True AND not on DigitalOcean AND dist doesn't exist
+    # Debug information
+    debug_info = f"""
+    <br><strong>Debug Information:</strong><br>
+    BASE_DIR: {base_dir}<br>
+    Dist path: {dist_path}<br>
+    Index path: {index_path}<br>
+    Index exists: {os.path.exists(index_path)}<br>
+    Host: {host}<br>
+    DEBUG: {settings.DEBUG}<br>
+    Is DigitalOcean: {is_digitalocean}<br>
+    BASE_DIR parent exists: {os.path.exists(base_dir.parent)}<br>
+    Dist folder exists: {os.path.exists(dist_path)}<br>
+    """
+    
+    # List parent directory contents for debugging
+    if os.path.exists(base_dir.parent):
+        parent_contents = '<br>'.join(os.listdir(base_dir.parent))
+        debug_info += f"<br>Parent directory contents:<br>{parent_contents}"
+    
+    # Check if index.html exists
     if os.path.exists(index_path):
         # Serve the built React app (always if it exists)
-        return FileResponse(open(index_path, 'rb'), content_type='text/html')
+        try:
+            return FileResponse(open(index_path, 'rb'), content_type='text/html')
+        except Exception as e:
+            return HttpResponse(
+                f"""
+                <html>
+                    <body>
+                        <h1>Error serving React app</h1>
+                        <p>Error: {str(e)}</p>
+                        {debug_info}
+                    </body>
+                </html>
+                """,
+                content_type='text/html',
+                status=500
+            )
     elif is_digitalocean:
-        # On DigitalOcean but build files missing - show error
+        # On DigitalOcean but build files missing - show detailed error
         return HttpResponse(
-            """
+            f"""
             <html>
+                <head>
+                    <title>Build Error - Oysloe Landing Page</title>
+                    <style>
+                        body {{ font-family: Arial, sans-serif; padding: 20px; }}
+                        .error {{ background: #fee; border: 1px solid #fcc; padding: 15px; margin: 10px 0; }}
+                        .info {{ background: #f0f0f0; padding: 10px; margin: 10px 0; }}
+                    </style>
+                </head>
                 <body>
                     <h1>Error: Build files not found</h1>
-                    <p>The React app build files are missing.</p>
-                    <p>Path checked: """ + index_path + """</p>
-                    <p>Host: """ + host + """</p>
-                    <p>DEBUG setting: """ + str(settings.DEBUG) + """</p>
+                    <div class="error">
+                        <p><strong>The React app build files are missing.</strong></p>
+                        <p>This usually means the frontend build step failed during deployment.</p>
+                    </div>
+                    <div class="info">
+                        {debug_info}
+                    </div>
+                    <h2>Next Steps:</h2>
+                    <ol>
+                        <li>Check the build logs in DigitalOcean App Platform</li>
+                        <li>Ensure npm install and npm run build completed successfully</li>
+                        <li>Verify that the dist folder was created in the build</li>
+                        <li>Check that the build command includes: npm install && npm run build</li>
+                    </ol>
                 </body>
             </html>
             """,
@@ -480,12 +534,13 @@ def serve_react_app(request):
     else:
         # Production but build files missing
         return HttpResponse(
-            """
+            f"""
             <html>
                 <body>
                     <h1>Error: Build files not found</h1>
                     <p>The React app build files are missing. Please ensure the frontend is built before deployment.</p>
                     <p>Check that the build command ran successfully.</p>
+                    {debug_info}
                 </body>
             </html>
             """,
